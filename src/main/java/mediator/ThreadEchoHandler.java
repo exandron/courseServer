@@ -2,6 +2,8 @@ package mediator;
 
 import db.DAO;
 import model.Admin;
+import model.Exam;
+import model.Test;
 import model.User;
 
 import javax.print.Doc;
@@ -40,12 +42,20 @@ public class ThreadEchoHandler implements Runnable{
                     case "getAllAdmins":
                         output.writeObject(dao.getAllAdmins());
                         break;
-//                    case "getAllUsers":
-//                        output.writeObject(dao.getAllUsers());
-//                        break;
+                    case "getAllTeachers":
+                        output.writeObject(dao.getAllTeachers());
+                        break;
                     case "getAllStudents":
                         output.writeObject(dao.getAllStudents());
                         break;
+                   case "getAllExams":
+                       Exam exam = (Exam) input.readObject();
+                       output.writeObject(dao.getAllExams(exam));
+                       break;
+                   case "getAllTests":
+                       Test test = (Test) input.readObject();
+                       output.writeObject(dao.getAllTests(test));
+                       break;
 //                    case "getAllClients":
 //                        output.writeObject(dao.getAllClients());
 //                        break;
@@ -80,18 +90,18 @@ public class ThreadEchoHandler implements Runnable{
 //                        Visits addVisit = (Visits) input.readObject();
 //                        output.writeObject(dao.addVisit(addVisit));
 //                        break;
-//                    case "updateMyUserData":
-//                        User updateMyUserData = (User) input.readObject();
-//                        output.writeObject(dao.updateMyUserData(updateMyUserData));
-//                        break;
+                    case "updateMyUserData":
+                        User updateMyUserData = (User) input.readObject();
+                        output.writeObject(dao.updateMyUserData(updateMyUserData));
+                        break;
                     case "updatePassword":
                         User updatePassword = (User) input.readObject();
                         output.writeObject(dao.updatePassword(updatePassword));
                         break;
-//                    case "updatePerson":
-//                        User updatePerson = (User) input.readObject();
-//                        output.writeObject(dao.updatePerson(updatePerson));
-//                        break;
+                    case "updatePerson":
+                        User updatePerson = (User) input.readObject();
+                        output.writeObject(dao.updatePerson(updatePerson));
+                        break;
                     case "updateAdmin":
                         Admin updateAdmin = (Admin) input.readObject();
                         output.writeObject(dao.updateAdmin(updateAdmin));
@@ -128,6 +138,7 @@ public class ThreadEchoHandler implements Runnable{
 //                        Visits currentVisit = (Visits) input.readObject();
 //                        output.writeObject(dao.getCheck(currentVisit));
 //                        break;
+                   default: System.out.println("Нет такой команды");
                }
             }
         }

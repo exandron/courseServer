@@ -43,7 +43,8 @@ public class DAO extends DbConnector{
 
     public ArrayList<Admin> getAllAdmins() throws SQLException{
         try {
-            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM user INNER JOIN admin on user.user_id=admin.user_id WHERE user.role='admin';"));
+            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM user INNER JOIN person on user.person_id=person.person_id\n" +
+                    "INNER JOIN admin on user.user_id=admin.user_id WHERE user.role='admin';"));
             ArrayList<Admin> adminList = new ArrayList<>();
             while(rs.next()){
                 Admin admin = new Admin(
@@ -54,9 +55,12 @@ public class DAO extends DbConnector{
                         rs.getString("name"),
                         rs.getString("surname"),
                         rs.getString("patronymic"),
-                        rs.getString("phone_number"),
+                        rs.getString("phone"),
                         rs.getString("email"),
-                        Integer.parseInt(rs.getString("admin_id"))
+                        Integer.parseInt(rs.getString("person_id")),
+                        Integer.parseInt(rs.getString("admin_id")),
+                        rs.getString("rights"),
+                        rs.getString("block")
                 );
                 adminList.add(admin);
             }
@@ -67,37 +71,50 @@ public class DAO extends DbConnector{
         }
         return null;
     }
-//
-//    public ArrayList<User> getAllUsers() throws SQLException{
-//        try {
-//            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM user INNER JOIN person ON user.person_id=person.person_id WHERE user.role='user';"));
-//            ArrayList<User> userList = new ArrayList<>();
-//            while(rs.next()){
-//                User user = new User(
-//                        Integer.parseInt(rs.getString("person_id")),
-//                        rs.getString("surname"),
-//                        rs.getString("name"),
-//                        rs.getString("lastname"),
-//                        rs.getString("personal_phone"),
-//                        Integer.parseInt(rs.getString("user_id")),
-//                        rs.getString("login"),
-//                        rs.getString("password"),
-//                        rs.getString("role"),
-//                        rs.getString("work_phone")
-//                );
-//                userList.add(user);
-//            }
-//            return userList;
-//        }
-//        catch (SQLException ex) {
-//            System.out.println(ex.getMessage());
-//        }
-//        return null;
-//    }
-//
+
+    public ArrayList<Teacher> getAllTeachers() throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM user INNER JOIN person on user.person_id=person.person_id\n" +
+                    "INNER JOIN teacher on user.user_id=teacher.user_id WHERE user.role='teacher'\n"));
+            ArrayList<Teacher> teacherList = new ArrayList<>();
+            while(rs.next()){
+                Teacher teacher = new Teacher(
+                        Integer.parseInt(rs.getString("person_id")),
+                        rs.getString("surname"),
+                        rs.getString("name"),
+                        rs.getString("patronymic"),
+                        rs.getString("phone"),
+                        rs.getString("email"),
+                        Integer.parseInt(rs.getString("user_id")),
+                        rs.getString("login"),
+                        rs.getString("password"),
+                        rs.getString("role"),
+                        Integer.parseInt(rs.getString("teacher_id")),
+                        rs.getString("post"),
+                        rs.getString("department")
+                );
+                teacherList.add(teacher);
+            }
+            return teacherList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
     public ArrayList<Student> getAllStudents() throws SQLException{
         try {
-            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM user INNER JOIN student on user.user_id=student.user_id WHERE user.role='Student';"));
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM user " +
+                            "INNER JOIN person ON user.person_id = person.person_id \n" +
+                            "INNER JOIN student ON user.user_id = student.user_id \n" +
+                            "INNER JOIN `group` ON student.group_id = `group`.group_id \n" +
+                            "INNER JOIN speciality ON `group`.speciality_id = speciality.speciality_id \n" +
+                            "INNER JOIN faculty ON speciality.faculty_id = faculty.faculty_id \n" +
+                            "WHERE user.role = 'student'")
+            );
+            System.out.println(rs);
             ArrayList<Student> studentList = new ArrayList<>();
             while(rs.next()){
 //                String schedule[];
@@ -106,29 +123,102 @@ public class DAO extends DbConnector{
 //                    if(schedule[i] == null) schedule[i] = "";
 //                }
                 Student student = new Student(
+                        Integer.parseInt(rs.getString("person_id")),
+                        rs.getString("surname"),
+                        rs.getString("name"),
+                        rs.getString("patronymic"),
+                        rs.getString("phone"),
+                        rs.getString("email"),
                         Integer.parseInt(rs.getString("user_id")),
                         rs.getString("login"),
                         rs.getString("password"),
                         rs.getString("role"),
-                        rs.getString("name"),
-                        rs.getString("surname"),
-                        rs.getString("patronymic"),
-                        rs.getString("phone_number"),
-//                        Integer.parseInt(rs.getString("user_id")),
- //                       String.parseString(rs.getDate("DOB")),
-                        rs.getInt("form_of_education"),
+                        Integer.parseInt(rs.getString("student_id")),
+                        rs.getString("DOB"),
+                        Integer.parseInt(rs.getString("form_of_education")),
                         rs.getString("address"),
-                        Integer.parseInt(rs.getString("student_id"))
-//                        rs.getString("work_phone"),
-//                        Integer.parseInt(rs.getString("doctor_id")),
-//                        rs.getString("post"),
-//                        rs.getString("room"),
-//                        rs.getString("district"),
-//                        schedule
+                        Integer.parseInt(rs.getString("group_id")),
+                        Integer.parseInt(rs.getString("number_of_group")),
+                        Integer.parseInt(rs.getString("faculty_id")),
+                        rs.getString("name_of_faculty"),
+                        Integer.parseInt(rs.getString("speciality_id")),
+                        rs.getString("name_of_speciality")
                 );
                 studentList.add(student);
             }
             return studentList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public ArrayList<Exam> getAllExams(Exam exam){
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM result " +
+                    "INNER JOIN student ON result.student_id = student.student_id \n" +
+                    "INNER JOIN subject_teacher ON result.subject_teacher_id = subject_teacher.subject_teacher_id \n" +
+                    "INNER JOIN teacher ON subject_teacher.teacher_id = teacher.teacher_id \n" +
+                    "INNER JOIN user on teacher.user_id=user.user_id\n" +
+                    "INNER JOIN subject ON subject_teacher.subject_id = subject.subject_id \n" +
+                    "INNER JOIN exam ON result.result_id = exam.result_id \n"+
+                    "INNER JOIN person on user.person_id=person.person_id WHERE semester='%d';\n", exam.getSemester()
+                    ));
+
+            ArrayList<Exam> examsList = new ArrayList<>();
+            while(rs.next()){
+                Exam exam1 = new Exam(
+                        Integer.parseInt(rs.getString("result_id")),
+                        rs.getString("date"),
+                        Integer.parseInt(rs.getString("semester")),
+                        Integer.parseInt(rs.getString("student_id")),
+                        Integer.parseInt(rs.getString("subject_teacher_id")),
+                        rs.getString("name_of_subject"),
+                        rs.getString("surname"),
+                        Integer.parseInt(rs.getString("exam_id")),
+                        Integer.parseInt(rs.getString("grade"))
+                );
+                examsList.add(exam1);
+            }
+            return examsList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public ArrayList<Test> getAllTests(Test test){
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM result " +
+                            "INNER JOIN student ON result.student_id = student.student_id \n" +
+                            "INNER JOIN subject_teacher ON result.subject_teacher_id = subject_teacher.subject_teacher_id \n" +
+                            "INNER JOIN teacher ON subject_teacher.teacher_id = teacher.teacher_id \n" +
+                            "INNER JOIN user on teacher.user_id=user.user_id\n" +
+                            "INNER JOIN subject ON subject_teacher.subject_id = subject.subject_id \n" +
+                            "INNER JOIN test ON result.result_id = test.result_id \n"+
+                            "INNER JOIN person on user.person_id=person.person_id WHERE semester='%d';\n", test.getSemester()
+            ));
+
+            ArrayList<Test> testsList = new ArrayList<>();
+            while(rs.next()){
+                Test test1 = new Test(
+                        Integer.parseInt(rs.getString("result_id")),
+                        rs.getString("date"),
+                        Integer.parseInt(rs.getString("semester")),
+                        Integer.parseInt(rs.getString("student_id")),
+                        Integer.parseInt(rs.getString("subject_teacher_id")),
+                        rs.getString("name_of_subject"),
+                        rs.getString("surname"),
+                        Integer.parseInt(rs.getString("test_id")),
+                        Boolean.parseBoolean(rs.getString("is_passed"))
+                );
+                testsList.add(test1);
+            }
+            return testsList;
         }
         catch (SQLException ex) {
             System.out.println(ex.getMessage());
@@ -325,9 +415,12 @@ public class DAO extends DbConnector{
 //
     public String addAdmin(Admin newAdmin){
         String addData[] = {
-                //String.format("INSERT INTO person (name, surname, lastname, personal_phone) VALUES('%s', '%s', '%s', '%s');", newAdmin.getName(), newAdmin.getSurname(), newAdmin.getLastname(), newAdmin.getPhone()),
-                String.format("INSERT INTO user (login, password, role) VALUES('%s', '%s', '%s');", newAdmin.getLogin(), newAdmin.getPassword(), newAdmin.getRole()),
-                String.format("INSERT INTO admin (name, surname, patronymic, phone_number, email, user_id) VALUES('%s', '%s', '%s', '%s', '%s', last_insert_id());", newAdmin.getName(), newAdmin.getSurname(), newAdmin.getPatronymic(), newAdmin.getPhoneNumber(), newAdmin.getEmail())
+//                //String.format("INSERT INTO person (name, surname, lastname, personal_phone) VALUES('%s', '%s', '%s', '%s');", newAdmin.getName(), newAdmin.getSurname(), newAdmin.getLastname(), newAdmin.getPhone()),
+//                String.format("INSERT INTO user (login, password, role) VALUES('%s', '%s', '%s');", newAdmin.getLogin(), newAdmin.getPassword(), newAdmin.getRole()),
+//                String.format("INSERT INTO admin (name, surname, patronymic, phone_number, email, user_id) VALUES('%s', '%s', '%s', '%s', '%s', last_insert_id());", newAdmin.getName(), newAdmin.getSurname(), newAdmin.getPatronymic(), newAdmin.getPhoneNumber(), newAdmin.getEmail())
+                String.format("INSERT INTO person (name, surname, patronymic, phone, email) VALUES('%s', '%s', '%s', '%s', '%s');", newAdmin.getName(), newAdmin.getSurname(), newAdmin.getPatronymic(), newAdmin.getPhone(), newAdmin.getEmail()),
+                String.format("INSERT INTO user (login, password, role, person_id) VALUES('%s', '%s', '%s', last_insert_id());", newAdmin.getLogin(), newAdmin.getPassword(), newAdmin.getRole()),
+                String.format("INSERT INTO admin (rights, block, user_id) VALUES('%s', '%s', last_insert_id());", newAdmin.getRights(), newAdmin.getBlock())
         };
         return addData(addData);
     }
@@ -381,12 +474,12 @@ public class DAO extends DbConnector{
 
 
     public String updateAdmin(Admin admin) throws SQLException{
-        String statement = String.format(
-                        "UPDATE user INNER JOIN admin ON admin.user_id=user.user_id\n" +
-                        "SET name='%s',surname='%s',patronymic='%s',phone_number='%s',email='%s'," +
-                        "login='%s'\n" +
-                        " WHERE user.user_id='%d';", admin.getName(), admin.getSurname(), admin.getPatronymic(), admin.getPhoneNumber(),
-                admin.getEmail(), admin.getLogin(), admin.getUserId());
+        String statement = String.format("UPDATE user INNER JOIN person ON person.person_id=user.person_id \n" +
+                        "INNER JOIN admin ON admin.user_id=user.user_id\n" +
+                        "SET name='%s',surname='%s',patronymic='%s',phone='%s',email='%s'," +
+                        "login='%s',rights='%s',block='%s'\n" +
+                        " WHERE user.user_id='%d';", admin.getName(), admin.getSurname(), admin.getPatronymic(), admin.getPhone(), admin.getEmail(),
+                admin.getLogin(), admin.getRights(), admin.getBlock(), admin.getUserId());
         try {
             super.getStatement().executeUpdate(statement);
             return "Успешно сохранено!";
@@ -421,27 +514,27 @@ public class DAO extends DbConnector{
 //        return updateData(statement);
 //    }
 //
-//    public String updateMyUserData(User user) throws SQLException{
-//        String statement = String.format("UPDATE user SET login='%s',password='%s',work_phone='%s' where user_id='%d';",
-//                user.getLogin(), user.getPassword(), user.getWork_phone(), user.getId());
-//        try {
-//            ResultSet rs1 = super.getStatement().executeQuery(String.format("select * from user WHERE login='%s' and user_id!='%d';", user.getLogin(), user.getId()));
-//            if(rs1.next()){return "Пользователь с таким логином уже существует!"; }
-//            super.getStatement().executeUpdate(statement);
-//            return "Успешно сохранено!";
-//        }
-//        catch (Exception ex){
-//            System.out.println(ex.getMessage());
-//        }
-//        return "Не удалось изменить данные";
-//    }
-//
-//    public String updatePerson(User user) throws SQLException{
-//        String statement = String.format("UPDATE person inner join user on person.person_id=user.user_id SET name='%s', surname='%s', " +
-//                "lastname='%s', personal_phone='%s' where user_id='%d';", user.getName(), user.getSurname(),user.getLastname(), user.getPhone(), user.getId());
-//        return updateData(statement);
-//    }
-//
+    public String updateMyUserData(User user) throws SQLException{
+        String statement = String.format("UPDATE user SET login='%s',password='%s' where user_id='%d';",
+                user.getLogin(), user.getPassword(), user.getId());
+        try {
+            ResultSet rs1 = super.getStatement().executeQuery(String.format("select * from user WHERE login='%s' and user_id!='%d';", user.getLogin(), user.getId()));
+            if(rs1.next()){return "Пользователь с таким логином уже существует!"; }
+            super.getStatement().executeUpdate(statement);
+            return "Успешно сохранено!";
+        }
+        catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
+        return "Не удалось изменить данные";
+    }
+
+    public String updatePerson(User user) throws SQLException{
+        String statement = String.format("UPDATE person inner join user on person.person_id=user.user_id SET name='%s', surname='%s', " +
+                "patronymic='%s', phone='%s', email='%s' where user_id='%d';", user.getName(), user.getSurname(),user.getPatronymic(), user.getPhone(), user.getEmail(), user.getId());
+        return updateData(statement);
+    }
+
     public String updatePassword(User user){
         String statement = String.format("UPDATE user SET password='%s' WHERE user.user_id='%d';", user.getPassword(), user.getId());
         return updateData(statement);
@@ -470,9 +563,9 @@ public class DAO extends DbConnector{
 //
 //
     public String deleteAdmin(Admin deleteAdmin){
-        String statement = String.format("DELETE from admin, user " +
-                "USING admin, user " +
-                "WHERE user.user_id=admin.user_id && user.login='%s';", deleteAdmin.getLogin());
+        String statement = String.format("DELETE from admin, user, person " +
+                "USING admin, user, person " +
+                "WHERE user.user_id=admin.user_id && user.person_id=person.person_id && user.login='%s';", deleteAdmin.getLogin());
         try{
             super.getStatement().execute(statement);
             return "Успешно удалено!";

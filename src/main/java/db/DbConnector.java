@@ -19,7 +19,6 @@ public class DbConnector {
             //Class.forName("com.mysql.jdbc.Driver");
             this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/university?useSSL=true&allowPublicKeyRetrieval=true", properties);
             this.statement = connection.createStatement();
-            System.out.println("fdfs");
         } catch (SQLException e ) {
             e.printStackTrace();
             System.out.println(e.getMessage());
