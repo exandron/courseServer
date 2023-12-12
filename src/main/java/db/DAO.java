@@ -114,7 +114,6 @@ public class DAO extends DbConnector{
                             "INNER JOIN faculty ON speciality.faculty_id = faculty.faculty_id \n" +
                             "WHERE user.role = 'student'")
             );
-            System.out.println(rs);
             ArrayList<Student> studentList = new ArrayList<>();
             while(rs.next()){
 //                String schedule[];
@@ -214,7 +213,7 @@ public class DAO extends DbConnector{
                         rs.getString("name_of_subject"),
                         rs.getString("surname"),
                         Integer.parseInt(rs.getString("test_id")),
-                        Boolean.parseBoolean(rs.getString("is_passed"))
+                        rs.getString("is_passed")
                 );
                 testsList.add(test1);
             }
@@ -225,191 +224,169 @@ public class DAO extends DbConnector{
         }
         return null;
     }
-//
-//    public ArrayList<Client> getAllClients() throws SQLException{
-//        try {
-//            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM client INNER JOIN person ON client.person_id=person.person_id;"));
-//            ArrayList<Client> clintList = new ArrayList<>();
-//            while(rs.next()){
-//                Client client = new Client(
-//                        Integer.parseInt(rs.getString("person_id")),
-//                        rs.getString("surname"),
-//                        rs.getString("name"),
-//                        rs.getString("lastname"),
-//                        rs.getString("personal_phone"),
-//                        Integer.parseInt(rs.getString("client_id")),
-//                        rs.getString("district"),
-//                        rs.getString("birth_date"),
-//                        rs.getString("address"),
-//                        rs.getString("passport_id")
-//                );
-//                clintList.add(client);
-//            }
-//            return clintList;
-//        }
-//        catch (SQLException ex) {
-//            System.out.println(ex.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    public ArrayList<Schedule> getRecordsSchedule(Doctor doctor){
-//        try{
-//            ArrayList<Schedule> scheduleList = new ArrayList<>();
-//            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT schedule, WEEKDAY(curdate()) as daynum FROM doctor where doctor_id='%d';", doctor.getId()));
-//            if(rs.next()){
-//                String doctorSchedule[] = rs.getString("schedule").split("-", 14);
-//                int curdamynum = Integer.parseInt(rs.getString("daynum"));
-//                int day = curdamynum;
-//                int interval = 0;
-//                while(day < 7){
-//                    ResultSet rsDateFirst = super.getStatement().executeQuery(String.format("SELECT adddate(curdate(), interval '%d' day) AS date;", interval));
-//                    if(rsDateFirst.next()){
-//                        String currentTime = doctorSchedule[day*2];
-//                        if(currentTime != null){
-//                            while(!currentTime.equals(doctorSchedule[day*2+1])){
-//                                Schedule schedule = new Schedule();
-//                                Statement statement = super.getConnection().createStatement();
-//                                ResultSet rsOldRecord = statement.executeQuery(String.format("SELECT * FROM visit \n" +
-//                                        "INNER JOIN client on visit.client_id=client.client_id \n" +
-//                                        "INNER JOIN doctor on visit.doctor_id=doctor.doctor_id\n" +
-//                                        "WHERE doctor.doctor_id='%d' AND time='%s' AND date='%s';", doctor.getId(), currentTime, rsDateFirst.getString("date")));
-//                                if(rsOldRecord.next()){
-//                                    schedule.setRegistrationTime(rsOldRecord.getString("registration_date"));
-//                                    schedule.setPassportNumber(rsOldRecord.getString("passport_id"));
-//                                    schedule.setComment(rsOldRecord.getString("comment"));
-//                                }
-//                                schedule.setDate(rsDateFirst.getString("date"));
-//                                schedule.setTime(currentTime);
-//                                scheduleList.add(schedule);
-//                                String hms[] = currentTime.split(":");
-//                                int hour = Integer.parseInt(hms[0]);
-//                                hour++;
-//                                if(String.valueOf(hour).length()==1) currentTime = "0" + String.valueOf(hour) + ":" + hms[1] + ":" + hms[2];
-//                                else currentTime = String.valueOf(hour) + ":" + hms[1] + ":" + hms[2];
-//                            }
-//                        }
-//                    }
-//                    interval++;
-//                    day++;
-//                }
-//                day = 0;
-//                while(day < curdamynum){
-//                    ResultSet rsDateFirst = super.getStatement().executeQuery(String.format("SELECT adddate(curdate(), interval '%d' day) AS date;", interval));
-//                    if(rsDateFirst.next()){
-//                        String currentTime = doctorSchedule[day*2];
-//                        if(currentTime != null){
-//                            while(!currentTime.equals(doctorSchedule[day*2+1])){
-//                                Schedule schedule = new Schedule();
-//                                Statement statement = super.getConnection().createStatement();
-//                                ResultSet rsOldRecord1 = statement.executeQuery(String.format("SELECT * FROM visit \n" +
-//                                        "INNER JOIN client on visit.client_id=client.client_id \n" +
-//                                        "INNER JOIN doctor on visit.doctor_id=doctor.doctor_id\n" +
-//                                        "WHERE doctor.doctor_id='%d' AND time='%s' AND date='%s';", doctor.getId(), currentTime, rsDateFirst.getString("date")));
-//                                if(rsOldRecord1.next()){
-//                                    schedule.setRegistrationTime(rsOldRecord1.getString("registration_date"));
-//                                    schedule.setPassportNumber(rsOldRecord1.getString("passport_id"));
-//                                    schedule.setComment(rsOldRecord1.getString("comment"));
-//                                }
-//                                schedule.setDate(rsDateFirst.getString("date"));
-//                                schedule.setTime(currentTime);
-//
-//                                scheduleList.add(schedule);
-//                                String hms[] = currentTime.split(":");
-//                                int hour = Integer.parseInt(hms[0]);
-//                                hour++;
-//                                if(String.valueOf(hour).length()==1) currentTime = "0" + String.valueOf(hour) + ":" + hms[1] + ":" + hms[2];
-//                                else currentTime = String.valueOf(hour) + ":" + hms[1] + ":" + hms[2];
-//                            }
-//                        }
-//                    }
-//                    interval++;
-//                    day++;
-//                }
-//            }
-//            return scheduleList;
-//        }catch (Exception ex){
-//            System.out.println(ex.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    public ArrayList<Visits> getAllVisits(){
-//        try {
-//            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM visit WHERE date>=curdate();"));
-//            ArrayList<Visits> visitsList = new ArrayList<>();
-//            while(rs.next()){
-//                Visits visit = new Visits(
-//                        Integer.parseInt(rs.getString("visit_id")),
-//                        rs.getString("registration_date"),
-//                        rs.getString("date"),
-//                        rs.getString("time"),
-//                        rs.getString("comment"),
-//                        Integer.parseInt(rs.getString("doctor_id")),
-//                        Integer.parseInt(rs.getString("client_id"))
-//                );
-//                visitsList.add(visit);
-//            }
-//            return visitsList;
-//        }
-//        catch (SQLException ex) {
-//            System.out.println(ex.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    public ArrayList<Visits> getAllVisitsDoctor(Doctor doctor){
-//        try {
-//            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM visit WHERE date>=curdate() AND doctor_id='%d';", doctor.getId()));
-//            ArrayList<Visits> visitsList = new ArrayList<>();
-//            while(rs.next()){
-//                Visits visit = new Visits(
-//                        Integer.parseInt(rs.getString("visit_id")),
-//                        rs.getString("registration_date"),
-//                        rs.getString("date"),
-//                        rs.getString("time"),
-//                        rs.getString("comment"),
-//                        Integer.parseInt(rs.getString("doctor_id")),
-//                        Integer.parseInt(rs.getString("client_id"))
-//                );
-//                visitsList.add(visit);
-//            }
-//            return visitsList;
-//        }
-//        catch (SQLException ex) {
-//            System.out.println(ex.getMessage());
-//        }
-//        return null;
-//    }
-//
-//    public String getCheck(Visits visit) throws SQLException{
-//        try{
-//            ResultSet rs = super.getStatement().executeQuery(String.format("select * from visit \n" +
-//                    "inner join client on visit.client_id=client.client_id\n" +
-//                    "inner join doctor on visit.doctor_id=doctor.doctor_id\n" +
-//                    "inner join user on doctor.user_id=user.user_id\n" +
-//                    "inner join person on person.person_id=user.person_id\n" +
-//                    "where visit.visit_id='%d';", visit.getId()));
-//            while(rs.next()){
-//                String result = "";
-//                result += rs.getString("date") + "#";
-//                result += rs.getString("time") + "#";
-//                result += rs.getString("passport_id") + "#";
-//                result += rs.getString("room") + "#";
-//                result += rs.getString("post") + "#";
-//                result += rs.getString("surname") + "#";
-//                result += rs.getString("name") + "#";
-//                result += rs.getString("lastname") + "#";
-//                result += rs.getString("work_phone") + "#";
-//                return result;
-//            }
-//        }catch (Exception ex){
-//            System.out.println(ex.getMessage());
-//        }
-//        return "";
-//    }
-//
-//
+
+    public Group getGroup(Group group) throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM `group` \n" +
+                    "INNER JOIN speciality ON `group`.speciality_id = speciality.speciality_id \n" +
+                    "INNER JOIN faculty ON speciality.faculty_id = faculty.faculty_id \n" +
+                    "WHERE `group`.number_of_group = '%d';\n", group.getNumberOfGroup())
+            );
+//            ArrayList<Group> groupList = new ArrayList<>();
+            Group group1 = new Group() ;
+            while(rs.next()){
+                group1 = new Group(
+                        Integer.parseInt(rs.getString("faculty_id")),
+                        rs.getString("name_of_faculty"),
+                        Integer.parseInt(rs.getString("speciality_id")),
+                        rs.getString("name_of_speciality"),
+                        Integer.parseInt(rs.getString("group_id")),
+                        Integer.parseInt(rs.getString("number_of_group"))
+                );
+            }
+            return group1;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public Speciality getSpeciality(Speciality speciality) throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM speciality \n" +
+                            "INNER JOIN faculty ON speciality.faculty_id = faculty.faculty_id \n" +
+                            "WHERE speciality.name_of_speciality = '%s';\n", speciality.getSpecialityName())
+            );
+//            ArrayList<Group> groupList = new ArrayList<>();
+            Speciality speciality1 = new Speciality() ;
+            while(rs.next()){
+                speciality1 = new Speciality(
+                        Integer.parseInt(rs.getString("faculty_id")),
+                        rs.getString("name_of_faculty"),
+                        Integer.parseInt(rs.getString("speciality_id")),
+                        rs.getString("name_of_speciality")
+                );
+            }
+            return speciality1;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public ArrayList<Group> getAllGroups() throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM `group` \n" +
+                            "INNER JOIN speciality ON `group`.speciality_id = speciality.speciality_id \n" +
+                            "INNER JOIN faculty ON speciality.faculty_id = faculty.faculty_id \n")
+            );
+            ArrayList<Group> groupsList = new ArrayList<>();
+            while(rs.next()){
+                Group group = new Group(
+                        Integer.parseInt(rs.getString("faculty_id")),
+                        rs.getString("name_of_faculty"),
+                        Integer.parseInt(rs.getString("speciality_id")),
+                        rs.getString("name_of_speciality"),
+                        Integer.parseInt(rs.getString("group_id")),
+                        Integer.parseInt(rs.getString("number_of_group"))
+                );
+                groupsList.add(group);
+            }
+            return groupsList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public ArrayList<Speciality> getAllSpecialities() throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM speciality \n" +
+                    "INNER JOIN faculty ON speciality.faculty_id = faculty.faculty_id \n")
+            );
+            ArrayList<Speciality> specialitiesList = new ArrayList<>();
+            while(rs.next()){
+                Speciality speciality = new Speciality(
+                        Integer.parseInt(rs.getString("faculty_id")),
+                        rs.getString("name_of_faculty"),
+                        Integer.parseInt(rs.getString("speciality_id")),
+                        rs.getString("name_of_speciality")
+                );
+                specialitiesList.add(speciality);
+            }
+            return specialitiesList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+    public ArrayList<Subject> getAllSubjects() throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM subject"));
+            ArrayList<Subject> subjectsList = new ArrayList<>();
+            while(rs.next()){
+                Subject subject = new Subject(
+                        Integer.parseInt(rs.getString("subject_id")),
+                        rs.getString("name_of_subject")
+                );
+                subjectsList.add(subject);
+            }
+            return subjectsList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public ArrayList<Subject> getAllSubjectTeacher(Teacher teacher) throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM subject_teacher\n" +
+                    "INNER JOIN subject ON subject_teacher.subject_id = subject.subject_id \n" +
+                    "INNER JOIN teacher ON subject_teacher.teacher_id = teacher.teacher_id \n" +
+                    "WHERE teacher.teacher_id = '%d';\n", teacher.getId())
+            );
+            ArrayList<Subject> subjectsList = new ArrayList<>();
+            while(rs.next()){
+                Subject subject = new Subject(
+                        Integer.parseInt(rs.getString("subject_id")),
+                        rs.getString("name_of_subject")
+                        );
+                subjectsList.add(subject);
+            }
+            return subjectsList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public SubjectTeacher getSubjectTeacher(SubjectTeacher subjectTeacher) throws SQLException{
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format("SELECT * FROM subject_teacher\n" +
+                    "WHERE subject_teacher.teacher_id = '%d' and subject_teacher.subject_id= '%d';\n", subjectTeacher.getId(), subjectTeacher.getSubjectId())
+            );
+            while(rs.next()){
+                subjectTeacher.setSubjectTeacherId( Integer.parseInt(rs.getString("subject_teacher_id")));
+                subjectTeacher.setSubjectTeacherId( Integer.parseInt(rs.getString("subject_id")));
+            }
+            return subjectTeacher;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
 //    //-------------------------ДОБАВЛЕНИЕ ДАННЫХ-------------------------------------
 //
 //
@@ -424,39 +401,47 @@ public class DAO extends DbConnector{
         };
         return addData(addData);
     }
-//
-//    public String addUser(User user){
-//        String addData[] = {
-//                String.format("INSERT INTO person (name, surname, lastname, personal_phone) VALUES('%s', '%s', '%s', '%s');", user.getName(), user.getSurname(), user.getLastname(), user.getPhone()),
-//                String.format("INSERT INTO user (login, password, role, work_phone, person_id) VALUES('%s', '%s', '%s', '%s', last_insert_id());", user.getLogin(), user.getPassword(), user.getRole(), user.getWork_phone())
-//        };
-//        return addData(addData);
-//    }
-//
-//    public String addDoctor(Doctor doctor){
-//        String addData[] = {
-//                String.format("INSERT INTO person (name, surname, lastname, personal_phone) VALUES('%s', '%s', '%s', '%s');", doctor.getName(), doctor.getSurname(), doctor.getLastname(), doctor.getPhone()),
-//                String.format("INSERT INTO user (login, password, role, work_phone, person_id) VALUES('%s', '%s', '%s', '%s', last_insert_id());", doctor.getLogin(), doctor.getPassword(), doctor.getRole(),doctor.getWork_phone()),
-//                String.format("INSERT INTO doctor (post, room, district, schedule, user_id) VALUES('%s', '%s', '%s', '%s', last_insert_id());", doctor.getPost(), doctor.getRoom(), doctor.getDistrict(), "-------------")
-//        };
-//        return addData(addData);
-//    }
-//
-//    public String addClient(Client client){
-//        String addData[] = {
-//                String.format("INSERT INTO person (name, surname, lastname, personal_phone) VALUES('%s', '%s', '%s', '%s');", client.getName(), client.getSurname(), client.getLastname(), client.getPhone()),
-//                String.format("INSERT INTO client (district, birth_date, address, passport_id, person_id) VALUES('%s', '%s', '%s', '%s', last_insert_id());", client.getDistrict(), client.getDateOfBirth(), client.getAddress(), client.getPassportNumber())
-//        };
-//        return addData(addData);
-//    }
-//
-//    public String addVisit(Visits visit){
-//        String addData[] = {
-//                String.format("INSERT INTO visit (registration_date, date, time, comment, doctor_id, client_id) VALUES(CURDATE(), '%s', '%s', '%s', '%d', '%d');", visit.getDate(), visit.getTime(), visit.getComment(), visit.getDoctor_id(), visit.getClient_id())
-//        };
-//        return addData(addData);
-//    }
 
+    public String addTeacher(Teacher teacher){
+        String addData[] = {
+                String.format("INSERT INTO person (surname, name, patronymic, phone, email) VALUES('%s', '%s', '%s', '%s', '%s');", teacher.getName(), teacher.getSurname(), teacher.getPatronymic(), teacher.getPhone(), teacher.getEmail()),
+                String.format("INSERT INTO user (login, password, role, person_id) VALUES('%s', '%s', '%s', last_insert_id());", teacher.getLogin(), teacher.getPassword(), teacher.getRole()),
+                String.format("INSERT INTO teacher (post, department, user_id) VALUES('%s', '%s', last_insert_id());", teacher.getPost(), teacher.getDepartment())
+        };
+        return addData(addData);
+    }
+
+    public String addStudent(Student student){
+        String addData[] = {
+                String.format("INSERT INTO person (surname, name, patronymic, phone, email) VALUES('%s', '%s', '%s', '%s', '%s');", student.getName(), student.getSurname(), student.getPatronymic(), student.getPhone(), student.getEmail()),
+                String.format("INSERT INTO user (login, password, role, person_id) VALUES('%s', '%s', '%s', last_insert_id());", student.getLogin(), student.getPassword(), student.getRole()),
+                String.format("INSERT INTO student (DOB, form_of_education, address, group_id, user_id) VALUES('%s', '%d', '%s', '%d', last_insert_id());", student.getDOB(), student.getFormOfEducation(), student.getAddress(), student.getGroupId())
+        };
+        return addData(addData);
+    }
+
+    public String addSubject(Subject subject){
+        String addData[] = {
+                String.format("INSERT INTO subject (name_of_subject) VALUES('%s');", subject.getSubjectName()),
+        };
+        return addData(addData);
+    }
+
+    public String addGroup(Group group){
+        String addData[] = {String.format("INSERT INTO `group` (number_of_group, speciality_id) SELECT '%d', speciality.speciality_id FROM speciality WHERE speciality.name_of_speciality = '%s';", group.getNumberOfGroup(), group.getSpecialityName())};
+        return addData(addData);
+    }
+
+    public String addExam(Exam exam){
+        String addData[] = {
+//                //String.format("INSERT INTO person (name, surname, lastname, personal_phone) VALUES('%s', '%s', '%s', '%s');", newAdmin.getName(), newAdmin.getSurname(), newAdmin.getLastname(), newAdmin.getPhone()),
+//                String.format("INSERT INTO user (login, password, role) VALUES('%s', '%s', '%s');", newAdmin.getLogin(), newAdmin.getPassword(), newAdmin.getRole()),
+//                String.format("INSERT INTO admin (name, surname, patronymic, phone_number, email, user_id) VALUES('%s', '%s', '%s', '%s', '%s', last_insert_id());", newAdmin.getName(), newAdmin.getSurname(), newAdmin.getPatronymic(), newAdmin.getPhoneNumber(), newAdmin.getEmail())
+                String.format("INSERT INTO result (date, semester, student_id, subject_teacher_id) VALUES('%s', '%d', '%d', '%d');", exam.getDate(), exam.getSemester(), exam.getStudentId(), exam.getSubjectTeacherId()),
+                String.format("INSERT INTO exam (grade, result_id) VALUES('%d', last_insert_id());", exam.getGrade())
+        };
+        return addData(addData);
+    }
     private String addData(String[] data){
         try{
             for(int i = 0; i < data.length;i++){
@@ -471,6 +456,68 @@ public class DAO extends DbConnector{
     }
 
     //--------------------------ОБНОВЛЕНИЕ ДАННЫХ--------------------------------------
+
+    public String getCheckExam(Exam resultExam) throws SQLException {
+            try {
+                ResultSet rs = super.getStatement().executeQuery(String.format(
+                        "SELECT * FROM result " +
+                                "INNER JOIN student ON result.student_id = student.student_id \n" +
+                                "INNER JOIN subject_teacher ON result.subject_teacher_id = subject_teacher.subject_teacher_id \n" +
+                                "INNER JOIN teacher ON subject_teacher.teacher_id = teacher.teacher_id \n" +
+                                "INNER JOIN user on teacher.user_id=user.user_id\n" +
+                                "INNER JOIN subject ON subject_teacher.subject_id = subject.subject_id \n" +
+                                "INNER JOIN exam ON result.result_id = exam.result_id \n" +
+                                "INNER JOIN person on user.person_id=person.person_id WHERE exam.exam_id='%d';\n", resultExam.getId()
+                ));
+                while (rs.next()) {
+                    String result = "";
+                    result += rs.getString("result_id") + "#";
+                    result += rs.getString("date") + "#";
+                    result += rs.getString("semester") + "#";
+                    result += rs.getString("student_id") + "#";
+                    result += rs.getString("subject_teacher_id") + "#";
+                    result += rs.getString("name_of_subject") + "#";
+                    result += rs.getString("surname") + "#";
+                    result += rs.getString("exam_id") + "#";
+                    result += rs.getString("grade") + "#";
+                    return result;
+                }
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+        return "";
+    }
+
+    public String getCheckTest(Test resultTest) throws SQLException {
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM result " +
+                            "INNER JOIN student ON result.student_id = student.student_id \n" +
+                            "INNER JOIN subject_teacher ON result.subject_teacher_id = subject_teacher.subject_teacher_id \n" +
+                            "INNER JOIN teacher ON subject_teacher.teacher_id = teacher.teacher_id \n" +
+                            "INNER JOIN user on teacher.user_id=user.user_id\n" +
+                            "INNER JOIN subject ON subject_teacher.subject_id = subject.subject_id \n" +
+                            "INNER JOIN test ON result.result_id = test.result_id \n" +
+                            "INNER JOIN person on user.person_id=person.person_id WHERE test.test_id='%d';\n", resultTest.getId()
+            ));
+            while (rs.next()) {
+                String result = "";
+                result += rs.getString("result_id") + "#";
+                result += rs.getString("date") + "#";
+                result += rs.getString("semester") + "#";
+                result += rs.getString("student_id") + "#";
+                result += rs.getString("subject_teacher_id") + "#";
+                result += rs.getString("name_of_subject") + "#";
+                result += rs.getString("surname") + "#";
+                result += rs.getString("test_id") + "#";
+                result += rs.getString("is_passed") + "#";
+                return result;
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return "";
+    }
 
 
     public String updateAdmin(Admin admin) throws SQLException{
@@ -490,35 +537,29 @@ public class DAO extends DbConnector{
         return "Не удалось изменить данные";
     }
 
-//    public String updateUser(User user) throws SQLException{
-//        String statement = String.format("UPDATE user INNER JOIN person ON person.person_id=user.person_id \n" +
-//                        "SET name='%s',surname='%s',lastname='%s',personal_phone='%s'," +
-//                        "login='%s',work_phone='%s'\n" +
-//                        " WHERE user.user_id='%d';", user.getName(), user.getSurname(), user.getLastname(), user.getPhone(),
-//                user.getLogin(), user.getWork_phone(), user.getId());
-//        return updateData(statement);
-//    }
-//
-//    public String updateDoctor(Doctor doctor) throws SQLException{
-//        String schedule = "";
-//        for(int i = 0; i < 14; i++){
-//            schedule += doctor.getSchedule()[i];
-//            if(i == 13) break;
-//            schedule += "-";
-//        }
-//        String statement = String.format("UPDATE user INNER JOIN person ON person.person_id=user.person_id \n" +
-//                        "INNER JOIN doctor ON doctor.user_id=user.user_id\n" +
-//                        "SET name='%s',surname='%s',lastname='%s',personal_phone='%s',login='%s',work_phone='%s',post='%s',room='%s',district='%s',schedule='%s'\n" +
-//                        "WHERE user.user_id='%d';", doctor.getName(), doctor.getSurname(), doctor.getLastname(), doctor.getPhone(),
-//                doctor.getLogin(), doctor.getWork_phone(), doctor.getPost(), doctor.getRoom(), doctor.getDistrict(), schedule, doctor.getUserId());
-//        return updateData(statement);
-//    }
-//
+    public String updateTeacher(Teacher teacher) throws SQLException{
+        String statement = String.format("UPDATE user INNER JOIN person ON person.person_id=user.person_id \n" +
+                        "INNER JOIN teacher ON user.user_id=teacher.user_id\n" +
+                        "SET name='%s',surname='%s',patronymic='%s',phone='%s',login='%s',email='%s',post='%s',department='%s'\n" +
+                        "WHERE user.user_id='%d';", teacher.getName(), teacher.getSurname(), teacher.getPatronymic(), teacher.getPhone(),
+                teacher.getLogin(), teacher.getEmail(), teacher.getPost(), teacher.getDepartment(), teacher.getUserId());
+        return updateData(statement);
+    }
+
+    public String updateStudent(Student student) throws SQLException{
+        String statement = String.format("UPDATE user INNER JOIN person ON person.person_id=user.person_id \n" +
+                        "INNER JOIN student ON user.user_id=student.user_id\n" +
+                        "SET name='%s',surname='%s',patronymic='%s',phone='%s',login='%s',email='%s',address='%s',DOB='%s',form_of_education='%d',group_id='%d'\n" +
+                        "WHERE user.user_id='%d';", student.getName(), student.getSurname(), student.getPatronymic(), student.getPhone(),
+                student.getLogin(), student.getEmail(), student.getAddress(), student.getDOB(), student.getFormOfEducation(), student.getGroupId(), student.getUserId());
+        return updateData(statement);
+    }
+
     public String updateMyUserData(User user) throws SQLException{
         String statement = String.format("UPDATE user SET login='%s',password='%s' where user_id='%d';",
                 user.getLogin(), user.getPassword(), user.getId());
         try {
-            ResultSet rs1 = super.getStatement().executeQuery(String.format("select * from user WHERE login='%s' and user_id!='%d';", user.getLogin(), user.getId()));
+            ResultSet rs1 = super.getStatement().executeQuery(String.format("SELECT * from user WHERE login='%s' and user_id!='%d';", user.getLogin(), user.getId()));
             if(rs1.next()){return "Пользователь с таким логином уже существует!"; }
             super.getStatement().executeUpdate(statement);
             return "Успешно сохранено!";
@@ -539,15 +580,24 @@ public class DAO extends DbConnector{
         String statement = String.format("UPDATE user SET password='%s' WHERE user.user_id='%d';", user.getPassword(), user.getId());
         return updateData(statement);
     }
-//
-//    public String updateClient(Client client){
-//        String statement = String.format("UPDATE client INNER JOIN person ON person.person_id=client.person_id \n" +
-//                "SET name='%s',surname='%s',lastname='%s',personal_phone='%s'," +
-//                "district='%s',birth_date='%s',address='%s',passport_id='%s'\n" +
-//                " WHERE client.client_id='%d';", client.getName(), client.getSurname(), client.getLastname(), client.getPhone(), client.getDistrict(), client.getDateOfBirth(), client.getAddress(), client.getPassportNumber(), client.getId());
-//        return updateData(statement);
-//    }
-//
+
+    public String updateSubject(Subject subject) {
+        String statement = String.format("UPDATE subject " +
+                "SET name_of_subject='%s' " +
+                "WHERE subject.subject_id='%d';", subject.getSubjectName(), subject.getSubjectId());
+        return updateData(statement);
+    }
+
+    public String updateGroup(Group group) {
+        String statement = String.format("UPDATE `group` " +
+                        "INNER JOIN speciality ON `group`.speciality_id = speciality.speciality_id " +
+                        "SET `group`.number_of_group = '%d', `group`.speciality_id = '%d' " +
+                        "WHERE `group`.group_id = '%d' AND speciality.name_of_speciality = '%s';",
+                group.getNumberOfGroup(), group.getSpecialityId(), group.getGroupId(), group.getSpecialityName());
+        return updateData(statement);
+    }
+
+
     private String updateData(String statement){
         try {
             super.getStatement().executeUpdate(statement);
@@ -575,45 +625,96 @@ public class DAO extends DbConnector{
         }
         return "Не удалось удалить данные!";
     }
+
+    public String deleteTeacher(Teacher deleteTeacher){
+        String statement = String.format("DELETE from person, teacher, user USING person, teacher, user WHERE person.person_id=user.person_id and user.user_id=teacher.user_id and teacher.teacher_id='%d';", deleteTeacher.getId());
+        try{
+            super.getStatement().execute(statement);
+            return "Успешно удалено!";
+        }
+        catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
+        return "Не удалось удалить данные!";
+    }
 //
-//
-//    public String deleteUser(User deleteUser){
-//        String statement = String.format("DELETE from user, person " +
-//                "USING user, person " +
-//                "WHERE user.person_id=person.person_id && user.login='%s';", deleteUser.getLogin());
-//        try{
-//            super.getStatement().execute(statement);
-//            return "Успешно удалено!";
-//        }
-//        catch (Exception ex){
-//            System.out.println(ex.getMessage());
-//        }
-//        return "Не удалось удалить данные!";
-//    }
-//
-//    public String deleteClient(Client client){
-//        String statement = String.format("DELETE from client, person, visit " +
-//                "USING client, person, visit " +
-//                "WHERE client.person_id=person.person_id && client.client_id=visit.client_id && client.client_id='%d';", client.getId());
-//        try{
-//            super.getStatement().execute(statement);
-//            return "Успешно удалено!";
-//        }
-//        catch (Exception ex){
-//            System.out.println(ex.getMessage());
-//        }
-//        return "Не удалось удалить данные!";
-//    }
-//
-//    public String deleteDoctor(Doctor doctor){
-//        String statement = String.format("DELETE from person, doctor, user USING person, doctor, user WHERE person.person_id=user.person_id and user.user_id=doctor.user_id and doctor.doctor_id='%d';", doctor.getId());
-//        try{
-//            super.getStatement().execute(statement);
-//            return "Успешно удалено!";
-//        }
-//        catch (Exception ex){
-//            System.out.println(ex.getMessage());
-//        }
-//        return "Не удалось удалить данные!";
-//    }
+public String deleteSubject(Subject subject) {
+    String statement = String.format("DELETE FROM subject WHERE subject.subject_id = %d;", subject.getSubjectId());
+    try {
+        super.getStatement().execute(statement);
+        return "Успешно удалено!";
+    } catch (Exception ex) {
+        System.out.println(ex.getMessage());
+    }
+    return "Не удалось удалить данные!";
+}
+
+    public String deleteStudent(Student student){
+        String statement = String.format("DELETE from person, student, user USING person, student, user WHERE person.person_id=user.person_id and user.user_id=student.user_id and student.student_id='%d';", student.getId());
+        try{
+            super.getStatement().execute(statement);
+            return "Успешно удалено!";
+        }
+        catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
+        return "Не удалось удалить данные!";
+    }
+
+    public String deleteGroup(Group group){
+        String statement = String.format("DELETE FROM `group`  WHERE `group`.group_id = '%d';", group.getGroupId());
+        try{
+            super.getStatement().execute(statement);
+            return "Успешно удалено!";
+        }
+        catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
+        return "Не удалось удалить данные!";
+    }
+
+    public  ArrayList<Student> findStudents(Student findStudent){
+        try {
+            ResultSet rs = super.getStatement().executeQuery(String.format(
+                    "SELECT * FROM user " +
+                            "INNER JOIN person ON user.person_id = person.person_id \n" +
+                            "INNER JOIN student ON user.user_id = student.user_id \n" +
+                            "INNER JOIN `group` ON student.group_id = `group`.group_id \n" +
+                            "INNER JOIN speciality ON `group`.speciality_id = speciality.speciality_id \n" +
+                            "INNER JOIN faculty ON speciality.faculty_id = faculty.faculty_id \n" +
+                            "WHERE `group`.number_of_group = '%d';", findStudent.getNumberOfGroup())
+            );
+            ArrayList<Student> studentList = new ArrayList<>();
+            while(rs.next()){
+                Student student = new Student(
+                        Integer.parseInt(rs.getString("person_id")),
+                        rs.getString("surname"),
+                        rs.getString("name"),
+                        rs.getString("patronymic"),
+                        rs.getString("phone"),
+                        rs.getString("email"),
+                        Integer.parseInt(rs.getString("user_id")),
+                        rs.getString("login"),
+                        rs.getString("password"),
+                        rs.getString("role"),
+                        Integer.parseInt(rs.getString("student_id")),
+                        rs.getString("DOB"),
+                        Integer.parseInt(rs.getString("form_of_education")),
+                        rs.getString("address"),
+                        Integer.parseInt(rs.getString("group_id")),
+                        Integer.parseInt(rs.getString("number_of_group")),
+                        Integer.parseInt(rs.getString("faculty_id")),
+                        rs.getString("name_of_faculty"),
+                        Integer.parseInt(rs.getString("speciality_id")),
+                        rs.getString("name_of_speciality")
+                );
+                studentList.add(student);
+            }
+            return studentList;
+        }
+        catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
 }
